@@ -8,7 +8,7 @@ class MessagesController < ApplicationController
 
     # Generate Tropo response 
     t = Tropo::Generator.new
-    t.call(:to => '+523121194800', :network => "SMS")
+    t.call(:to => '+523121194496', :network => "SMS")
     t.say(:value => "its aliveee!")
     tropo_message = t.response
 
