@@ -1,0 +1,10 @@
+= form_tag('/send_sms')
+%p
+  = label_tag 'phone'
+  %br/
+  = text_field_tag 'phone'
+%p
+  = label_tag 'text'
+  %br/
+  = text_field_tag 'text'
+%p= submit_tag 'Send'

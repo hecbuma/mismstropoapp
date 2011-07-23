@@ -1,20 +1,38 @@
 class MessagesController < ApplicationController
-  # Process an SMS message request from Tropo
-  def sms
-    #values = params[:session][:parameters]
-    request_token = '06a748a14827484b94cf6a54ae796f5dcca4ca9ee1c87810470d6efaba46681a1303749943b18bb4b55faf7c'
-    request_user = '534'
-    request_ticket = Time.now.to_i
 
-    # Generate Tropo response 
-    t = Tropo::Generator.new
-    t.call(:to => '+523121194496', :network => "SMS")
-    t.say(:value => "its aliveee!")
-    tropo_message = t.response
+  require 'net/http'
 
-    respond_to do |format|
-      format.html  { redirect_to root_path }
-      format.json  { render :json => tropo_message }
+  def index
+  end
+
+  def send_sms
+    http = Net::HTTP.new(URI.parse(AppConfig[Rails.env]['tropo']['api_url']).host)
+    token = '06a748a14827484b94cf6a54ae796f5dcca4ca9ee1c87810470d6efaba46681a1303749943b18bb4b55faf7c'
+    path = "/1.0/sessions?action=create&token=#{token}&msg=#{CGI::escape(params[:text])}&to=#{params[:phone]}&callerID=#{AppConfig[Rails.env]['tropo']['app_phone']}"
+    resp = http.get(path)
+    resp.code
+    if resp.code == '200'
+      flash[:notice] = 'Sent!'
+    else
+      flash[:error] = "#Fail! (error code: #{resp.code}) everything else: #{resp}"
     end
-  end  
+    redirect_to root_url
+  end
+
+  def tropo_callback
+    sessions_object = Tropo::Generator.parse request.filtered_parameters
+    msg = sessions_object[:session][:parameters][:msg]
+    number_to_dial = sessions_object[:session][:parameters][:to]
+    tropo = Tropo::Generator.new do
+      message({
+        :to => "#{number_to_dial}",
+        :channel => 'TEXT',
+        :network => 'SMS'}) do
+          say :value => msg
+        end
+    end
+    response = tropo.response
+    render :json => JSON.parse(response)
+  end
+
 end
