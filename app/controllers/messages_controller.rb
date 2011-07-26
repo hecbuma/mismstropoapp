@@ -5,7 +5,7 @@ require 'net/http'
       end
 
       def send_sms
-        http = Net::HTTP.new(URI.parse(('http://mismstropapp.heroku.com')))
+        http = Net::HTTP.new(URI.parse(('http://api.tropo.com')))
         token = '06a748a14827484b94cf6a54ae796f5dcca4ca9ee1c87810470d6efaba46681a1303749943b18bb4b55faf7c'
         path = "/1.0/sessions?action=create&token=#{token}&msg=#{CGI::escape(params[:text])}&to=#{params[:phone]}&callerID='9996136362'"
         resp = http.get(path)
